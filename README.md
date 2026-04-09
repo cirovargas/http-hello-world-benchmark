@@ -22,8 +22,9 @@ A simple benchmark comparing HTTP server performance across five languages and f
 | golang | Go | net/http (stdlib) | Go 1.24 | 4000 |
 | rust | Rust | Actix-web | Rust latest / Actix-web 4 | 5000 |
 | java | Java | Spring Boot WebFlux (Netty) | Java 21 / Spring Boot 3.4 | 8080 |
+| java-native | Java | Spring Boot WebFlux + GraalVM Native | Java 21 / Spring Boot 3.4 / GraalVM CE 21 | 8081 |
 
-All containers: **1 CPU · 1 GB RAM · 1 worker** (Java uses default Netty event loop threads)
+All containers: **1 CPU · 1 GB RAM · 1 worker** (Java/Java-native use default Netty event loop threads)
 
 Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 2.8).
 
@@ -49,7 +50,8 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 | 🥉 3 | JavaScript | Fastify 5 | **15,685** | 127 ms | 119 ms | 135 ms | 378 ms | 0 |
 | 4 | Go | net/http | **15,680** | 127 ms | 124 ms | 138 ms | 151 ms | 0 |
 | 5 | Python | FastAPI + Granian | **14,613** | 137 ms | 119 ms | 169 ms | 191 ms | 0 |
-| 6 | Java | Spring Boot WebFlux | **13,116** | 152 ms | 134 ms | 200 ms | 794 ms | 0 |
+| 6 | Java | Spring Boot WebFlux + GraalVM Native | **14,452** | 138 ms | 113 ms | 185 ms | 199 ms | 0 |
+| 7 | Java | Spring Boot WebFlux (JVM) | **13,116** | 152 ms | 134 ms | 200 ms | 794 ms | 0 |
 
 ---
 
@@ -241,6 +243,37 @@ Percentage of the requests served within a certain time (ms)
 ```
 </details>
 
+<details>
+<summary>Java — Spring Boot WebFlux + GraalVM Native (port 8081)</summary>
+
+```
+Concurrency Level:      2000
+Time taken for tests:   69.195 seconds
+Complete requests:      1000000
+Failed requests:        0
+Requests per second:    14451.97 [#/sec] (mean)
+Time per request:       138.389 [ms] (mean)
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    2   2.0      2      25
+Processing:    10  136  81.7    111    1163
+Waiting:        3  135  81.7    110    1161
+Total:         28  138  81.3    113    1165
+
+Percentage of the requests served within a certain time (ms)
+  50%    113
+  66%    124
+  75%    172
+  80%    175
+  90%    181
+  95%    185
+  98%    190
+  99%    199
+ 100%   1165 (longest request)
+```
+</details>
+
 ---
 
 ## Notes
@@ -248,7 +281,8 @@ Percentage of the requests served within a certain time (ms)
 - **Swoole** and **Rust** are essentially tied at the top (~232 req/s apart). Swoole benefits from io_uring for async I/O at the kernel level and is a compiled C extension driving the event loop, not interpreted PHP.
 - **Fastify and Go** are also nearly identical (~5 req/s apart), both sitting just below the top two.
 - **FastAPI + Granian** with a single worker delivers ~14,600 req/s — a ~2.7× improvement over Uvicorn (5,409 req/s). Granian is a Rust-based ASGI server that avoids much of Uvicorn's Python overhead. Python is now within 15% of Go/Fastify.
-- **Spring Boot WebFlux** (Netty) lands at ~13,100 req/s. JVM startup and GC overhead show up mostly in the p99 tail (794 ms) compared to the compiled languages. The default Netty event loop used multiple threads despite the 1 CPU limit.
+- **Spring Boot WebFlux + GraalVM Native** (AOT-compiled) reaches ~14,450 req/s — a ~10% improvement over the JVM version, but more importantly the p99 tail drops from 794 ms to 199 ms, eliminating GC pause spikes entirely. Compile time is ~46s.
+- **Spring Boot WebFlux (JVM)** lands at ~13,100 req/s. GC pauses are visible in the p99 tail (794 ms). The default Netty event loop uses multiple threads despite the 1 CPU limit.
 
 ## How to run
 
@@ -260,5 +294,6 @@ ab -n 1000000 -c 2000 http://localhost:8000/   # FastAPI
 ab -n 1000000 -c 2000 http://localhost:3000/   # Fastify
 ab -n 1000000 -c 2000 http://localhost:4000/   # Go
 ab -n 1000000 -c 2000 http://localhost:5000/   # Rust
-ab -n 1000000 -c 2000 http://localhost:8080/   # Java
+ab -n 1000000 -c 2000 http://localhost:8080/   # Java (JVM)
+ab -n 1000000 -c 2000 http://localhost:8081/   # Java (Native)
 ```
