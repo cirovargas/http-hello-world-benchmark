@@ -43,11 +43,11 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 
 | Rank | Language | Framework | Req/sec | Mean latency | p50 | p95 | p99 | Failed |
 |---|---|---|---|---|---|---|---|---|
-| 🥇 1 | PHP | Swoole 6.2 (io_uring) | **15,951** | 125 ms | 124 ms | 141 ms | 149 ms | 0 |
-| 🥈 2 | JavaScript | Fastify 5 | **14,433** | 138 ms | 135 ms | 148 ms | 165 ms | 0 |
-| 🥉 3 | Rust | Actix-web 4 | **13,814** | 144 ms | 142 ms | 160 ms | 172 ms | 0 |
-| 4 | Go | net/http | **13,737** | 145 ms | 144 ms | 159 ms | 168 ms | 0 |
-| 5 | Python | FastAPI + Uvicorn | **5,258** | 380 ms | 374 ms | 427 ms | 491 ms | 0 |
+| 🥇 1 | PHP | Swoole 6.2 (io_uring) | **16,600** | 120 ms | 115 ms | 135 ms | 153 ms | 0 |
+| 🥈 2 | Rust | Actix-web 4 | **16,368** | 122 ms | 118 ms | 129 ms | 147 ms | 0 |
+| 🥉 3 | JavaScript | Fastify 5 | **15,685** | 127 ms | 119 ms | 135 ms | 378 ms | 0 |
+| 4 | Go | net/http | **15,680** | 127 ms | 124 ms | 138 ms | 151 ms | 0 |
+| 5 | Python | FastAPI + Uvicorn | **5,409** | 369 ms | 359 ms | 389 ms | 821 ms | 0 |
 
 ---
 
@@ -58,60 +58,29 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 
 ```
 Concurrency Level:      2000
-Time taken for tests:   62.689 seconds
+Time taken for tests:   60.241 seconds
 Complete requests:      1000000
 Failed requests:        0
-Requests per second:    15951.77 [#/sec] (mean)
-Time per request:       125.378 [ms] (mean)
+Requests per second:    16599.99 [#/sec] (mean)
+Time per request:       120.482 [ms] (mean)
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.8      0      23
-Processing:    12  125  12.6    124     276
-Waiting:        1  125  12.6    124     276
-Total:         23  125  12.4    124     276
+Connect:        0    0   0.7      0      21
+Processing:    10  120  34.9    115     590
+Waiting:        1  120  34.9    115     590
+Total:         21  120  34.8    115     590
 
 Percentage of the requests served within a certain time (ms)
-  50%    124
-  66%    128
-  75%    130
-  80%    132
-  90%    138
-  95%    141
-  98%    144
-  99%    149
- 100%    276 (longest request)
-```
-</details>
-
-<details>
-<summary>JavaScript — Fastify 5 (port 3000)</summary>
-
-```
-Concurrency Level:      2000
-Time taken for tests:   69.285 seconds
-Complete requests:      1000000
-Failed requests:        0
-Requests per second:    14433.03 [#/sec] (mean)
-Time per request:       138.571 [ms] (mean)
-
-Connection Times (ms)
-              min  mean[+/-sd] median   max
-Connect:        0    0   0.7      0      20
-Processing:    15  138  43.9    135    1141
-Waiting:        3  138  43.9    135    1141
-Total:         24  138  44.3    135    1150
-
-Percentage of the requests served within a certain time (ms)
-  50%    135
-  66%    137
-  75%    138
-  80%    139
-  90%    143
-  95%    148
-  98%    156
-  99%    165
- 100%   1150 (longest request)
+  50%    115
+  66%    119
+  75%    122
+  80%    123
+  90%    129
+  95%    135
+  98%    143
+  99%    153
+ 100%    590 (longest request)
 ```
 </details>
 
@@ -120,29 +89,60 @@ Percentage of the requests served within a certain time (ms)
 
 ```
 Concurrency Level:      2000
-Time taken for tests:   72.390 seconds
+Time taken for tests:   61.097 seconds
 Complete requests:      1000000
 Failed requests:        0
-Requests per second:    13814.13 [#/sec] (mean)
-Time per request:       144.779 [ms] (mean)
+Requests per second:    16367.52 [#/sec] (mean)
+Time per request:       122.193 [ms] (mean)
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.7      0     125
-Processing:     9  145  13.3    142     299
-Waiting:        0  145  13.3    142     299
-Total:         20  145  13.1    142     299
+Connect:        0    0   0.8      0     475
+Processing:     8  122  34.5    118     602
+Waiting:        1  122  34.5    118     602
+Total:         21  122  34.4    118     602
 
 Percentage of the requests served within a certain time (ms)
-  50%    142
-  66%    145
-  75%    147
-  80%    149
-  90%    154
-  95%    160
-  98%    166
-  99%    172
- 100%    299 (longest request)
+  50%    118
+  66%    119
+  75%    120
+  80%    121
+  90%    125
+  95%    129
+  98%    140
+  99%    147
+ 100%    602 (longest request)
+```
+</details>
+
+<details>
+<summary>JavaScript — Fastify 5 (port 3000)</summary>
+
+```
+Concurrency Level:      2000
+Time taken for tests:   63.757 seconds
+Complete requests:      1000000
+Failed requests:        0
+Requests per second:    15684.62 [#/sec] (mean)
+Time per request:       127.513 [ms] (mean)
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   0.9      0     470
+Processing:    15  127  71.1    119    1131
+Waiting:        6  127  71.1    119    1131
+Total:         24  127  71.3    119    1136
+
+Percentage of the requests served within a certain time (ms)
+  50%    119
+  66%    120
+  75%    121
+  80%    122
+  90%    127
+  95%    135
+  98%    146
+  99%    378
+ 100%   1136 (longest request)
 ```
 </details>
 
@@ -151,29 +151,29 @@ Percentage of the requests served within a certain time (ms)
 
 ```
 Concurrency Level:      2000
-Time taken for tests:   72.798 seconds
+Time taken for tests:   63.777 seconds
 Complete requests:      1000000
 Failed requests:        0
-Requests per second:    13736.61 [#/sec] (mean)
-Time per request:       145.596 [ms] (mean)
+Requests per second:    15679.63 [#/sec] (mean)
+Time per request:       127.554 [ms] (mean)
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   2.2      0     127
-Processing:    10  145  14.1    144     327
-Waiting:        1  145  14.1    144     325
-Total:         24  145  13.9    144     327
+Connect:        0    0   1.0      0     472
+Processing:     8  127  36.1    124     608
+Waiting:        1  127  36.1    124     607
+Total:         20  127  36.0    124     608
 
 Percentage of the requests served within a certain time (ms)
-  50%    144
-  66%    147
-  75%    149
-  80%    151
-  90%    155
-  95%    159
-  98%    164
-  99%    168
- 100%    327 (longest request)
+  50%    124
+  66%    126
+  75%    128
+  80%    129
+  90%    134
+  95%    138
+  98%    144
+  99%    151
+ 100%    608 (longest request)
 ```
 </details>
 
@@ -182,29 +182,29 @@ Percentage of the requests served within a certain time (ms)
 
 ```
 Concurrency Level:      2000
-Time taken for tests:   190.178 seconds
+Time taken for tests:   184.861 seconds
 Complete requests:      1000000
 Failed requests:        0
-Requests per second:    5258.23 [#/sec] (mean)
-Time per request:       380.356 [ms] (mean)
+Requests per second:    5409.48 [#/sec] (mean)
+Time per request:       369.722 [ms] (mean)
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   1.5      1     122
-Processing:     9  379  29.5    373     549
-Waiting:        1  322  37.2    322     521
-Total:         22  380  29.3    374     550
+Connect:        0    1   1.1      1      19
+Processing:     8  368  71.3    358    1185
+Waiting:        1  315  65.2    310    1168
+Total:         20  369  71.2    359    1185
 
 Percentage of the requests served within a certain time (ms)
-  50%    374
-  66%    386
-  75%    393
-  80%    398
-  90%    412
-  95%    427
-  98%    457
-  99%    491
- 100%    550 (longest request)
+  50%    359
+  66%    364
+  75%    366
+  80%    369
+  90%    377
+  95%    389
+  98%    459
+  99%    821
+ 100%   1185 (longest request)
 ```
 </details>
 
