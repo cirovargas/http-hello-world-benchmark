@@ -26,6 +26,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - SYS_ADMIN
     deploy:
       resources:
         limits:
@@ -39,6 +45,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - SYS_ADMIN
     deploy:
       resources:
         limits:
@@ -52,6 +64,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "4000:4000"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - SYS_ADMIN
     deploy:
       resources:
         limits:
@@ -65,6 +83,12 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - SYS_ADMIN
     deploy:
       resources:
         limits:
