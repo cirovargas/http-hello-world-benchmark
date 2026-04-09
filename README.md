@@ -212,9 +212,8 @@ Percentage of the requests served within a certain time (ms)
 
 ## Notes
 
-- **Swoole** benefits from io_uring for async I/O at the kernel level, which likely contributes to its lead. It is also a compiled C extension running inside PHP, not interpreted userland code handling the event loop.
-- **Fastify** is consistently one of the fastest Node.js frameworks and shows here, beating compiled languages in this specific test.
-- **Rust and Go** are extremely close (~77 req/s apart). Both use 1 worker/goroutine and the stdlib or a minimal framework. With more workers both would scale further.
+- **Swoole** and **Rust** are essentially tied at the top (~232 req/s apart). Swoole benefits from io_uring for async I/O at the kernel level and is a compiled C extension driving the event loop, not interpreted PHP.
+- **Fastify and Go** are also nearly identical (~5 req/s apart), both sitting just below the top two.
 - **FastAPI + Uvicorn** with a single worker is limited by Python's single-threaded async event loop. Using Gunicorn with multiple Uvicorn workers, or switching to a faster ASGI server (e.g. `granian`), would significantly improve throughput.
 
 ## How to run
