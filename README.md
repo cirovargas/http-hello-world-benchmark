@@ -17,7 +17,7 @@ A simple benchmark comparing HTTP server performance across five languages and f
 | Container | Language | Framework | Version | Port |
 |---|---|---|---|---|
 | swoole | PHP | Swoole HTTP Server | PHP 8.5.4 / Swoole 6.2.0 | 9501 |
-| fastapi | Python | FastAPI + Uvicorn | Python 3.13 / FastAPI 0.135 | 8000 |
+| fastapi | Python | FastAPI + Granian | Python 3.13 / FastAPI 0.135 / Granian 2.7 | 8000 |
 | fastify | JavaScript | Fastify | Node 23 / Fastify 5 | 3000 |
 | golang | Go | net/http (stdlib) | Go 1.24 | 4000 |
 | rust | Rust | Actix-web | Rust latest / Actix-web 4 | 5000 |
@@ -47,7 +47,7 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 | 🥈 2 | Rust | Actix-web 4 | **16,368** | 122 ms | 118 ms | 129 ms | 147 ms | 0 |
 | 🥉 3 | JavaScript | Fastify 5 | **15,685** | 127 ms | 119 ms | 135 ms | 378 ms | 0 |
 | 4 | Go | net/http | **15,680** | 127 ms | 124 ms | 138 ms | 151 ms | 0 |
-| 5 | Python | FastAPI + Uvicorn | **5,409** | 369 ms | 359 ms | 389 ms | 821 ms | 0 |
+| 5 | Python | FastAPI + Granian | **14,613** | 137 ms | 119 ms | 169 ms | 191 ms | 0 |
 
 ---
 
@@ -178,33 +178,33 @@ Percentage of the requests served within a certain time (ms)
 </details>
 
 <details>
-<summary>Python — FastAPI + Uvicorn (port 8000)</summary>
+<summary>Python — FastAPI + Granian (port 8000)</summary>
 
 ```
 Concurrency Level:      2000
-Time taken for tests:   184.861 seconds
+Time taken for tests:   68.433 seconds
 Complete requests:      1000000
 Failed requests:        0
-Requests per second:    5409.48 [#/sec] (mean)
-Time per request:       369.722 [ms] (mean)
+Requests per second:    14612.83 [#/sec] (mean)
+Time per request:       136.866 [ms] (mean)
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    1   1.1      1      19
-Processing:     8  368  71.3    358    1185
-Waiting:        1  315  65.2    310    1168
-Total:         20  369  71.2    359    1185
+Connect:        0    0   1.2      0     394
+Processing:    26  137  66.5    119    1116
+Waiting:        1  136  66.5    119    1116
+Total:         26  137  66.6    119    1125
 
 Percentage of the requests served within a certain time (ms)
-  50%    359
-  66%    364
-  75%    366
-  80%    369
-  90%    377
-  95%    389
-  98%    459
-  99%    821
- 100%   1185 (longest request)
+  50%    119
+  66%    126
+  75%    159
+  80%    161
+  90%    166
+  95%    169
+  98%    175
+  99%    191
+ 100%   1125 (longest request)
 ```
 </details>
 
@@ -214,7 +214,7 @@ Percentage of the requests served within a certain time (ms)
 
 - **Swoole** and **Rust** are essentially tied at the top (~232 req/s apart). Swoole benefits from io_uring for async I/O at the kernel level and is a compiled C extension driving the event loop, not interpreted PHP.
 - **Fastify and Go** are also nearly identical (~5 req/s apart), both sitting just below the top two.
-- **FastAPI + Uvicorn** with a single worker is limited by Python's single-threaded async event loop. Using Gunicorn with multiple Uvicorn workers, or switching to a faster ASGI server (e.g. `granian`), would significantly improve throughput.
+- **FastAPI + Granian** with a single worker delivers ~14,600 req/s — a ~2.7× improvement over Uvicorn (5,409 req/s). Granian is a Rust-based ASGI server that avoids much of Uvicorn's Python overhead. Python is still last, but now within 2× of the top performers rather than 3×.
 
 ## How to run
 
