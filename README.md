@@ -21,8 +21,9 @@ A simple benchmark comparing HTTP server performance across five languages and f
 | fastify | JavaScript | Fastify | Node 23 / Fastify 5 | 3000 |
 | golang | Go | net/http (stdlib) | Go 1.24 | 4000 |
 | rust | Rust | Actix-web | Rust latest / Actix-web 4 | 5000 |
+| java | Java | Spring Boot WebFlux (Netty) | Java 21 / Spring Boot 3.4 | 8080 |
 
-All containers: **1 CPU · 1 GB RAM · 1 worker**
+All containers: **1 CPU · 1 GB RAM · 1 worker** (Java uses default Netty event loop threads)
 
 Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 2.8).
 
@@ -48,6 +49,7 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 | 🥉 3 | JavaScript | Fastify 5 | **15,685** | 127 ms | 119 ms | 135 ms | 378 ms | 0 |
 | 4 | Go | net/http | **15,680** | 127 ms | 124 ms | 138 ms | 151 ms | 0 |
 | 5 | Python | FastAPI + Granian | **14,613** | 137 ms | 119 ms | 169 ms | 191 ms | 0 |
+| 6 | Java | Spring Boot WebFlux | **13,116** | 152 ms | 134 ms | 200 ms | 794 ms | 0 |
 
 ---
 
@@ -208,24 +210,55 @@ Percentage of the requests served within a certain time (ms)
 ```
 </details>
 
+<details>
+<summary>Java — Spring Boot WebFlux / Netty (port 8080)</summary>
+
+```
+Concurrency Level:      2000
+Time taken for tests:   76.242 seconds
+Complete requests:      1000000
+Failed requests:        0
+Requests per second:    13116.08 [#/sec] (mean)
+Time per request:       152.485 [ms] (mean)
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    1   1.8      0     659
+Processing:    12  152 117.4    134    2331
+Waiting:        4  151 117.4    134    2331
+Total:         25  152 117.7    134    2331
+
+Percentage of the requests served within a certain time (ms)
+  50%    134
+  66%    142
+  75%    148
+  80%    151
+  90%    161
+  95%    200
+  98%    401
+  99%    794
+ 100%   2331 (longest request)
+```
+</details>
+
 ---
 
 ## Notes
 
 - **Swoole** and **Rust** are essentially tied at the top (~232 req/s apart). Swoole benefits from io_uring for async I/O at the kernel level and is a compiled C extension driving the event loop, not interpreted PHP.
 - **Fastify and Go** are also nearly identical (~5 req/s apart), both sitting just below the top two.
-- **FastAPI + Granian** with a single worker delivers ~14,600 req/s — a ~2.7× improvement over Uvicorn (5,409 req/s). Granian is a Rust-based ASGI server that avoids much of Uvicorn's Python overhead. Python is still last, but now within 2× of the top performers rather than 3×.
+- **FastAPI + Granian** with a single worker delivers ~14,600 req/s — a ~2.7× improvement over Uvicorn (5,409 req/s). Granian is a Rust-based ASGI server that avoids much of Uvicorn's Python overhead. Python is now within 15% of Go/Fastify.
+- **Spring Boot WebFlux** (Netty) lands at ~13,100 req/s. JVM startup and GC overhead show up mostly in the p99 tail (794 ms) compared to the compiled languages. The default Netty event loop used multiple threads despite the 1 CPU limit.
 
 ## How to run
 
 ```bash
-# Start all containers
 docker compose up -d
 
-# Run a benchmark against a specific service
 ab -n 1000000 -c 2000 http://localhost:9501/   # Swoole
 ab -n 1000000 -c 2000 http://localhost:8000/   # FastAPI
 ab -n 1000000 -c 2000 http://localhost:3000/   # Fastify
 ab -n 1000000 -c 2000 http://localhost:4000/   # Go
 ab -n 1000000 -c 2000 http://localhost:5000/   # Rust
+ab -n 1000000 -c 2000 http://localhost:8080/   # Java
 ```
