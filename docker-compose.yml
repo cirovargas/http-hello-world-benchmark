@@ -1,0 +1,73 @@
+services:
+  swoole:
+    build:
+      context: ./swoole
+      dockerfile: Dockerfile
+    ports:
+      - "9501:9501"
+    # io_uring needs memlock headroom; ulimits ensure it isn't capped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    # Required capabilities for io_uring fixed-buffer operations
+    cap_add:
+      - SYS_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped
+
+  fastapi:
+    build:
+      context: ./fastapi
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped
+
+  fastify:
+    build:
+      context: ./fastify
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped
+
+  golang:
+    build:
+      context: ./golang
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped
+
+  rust:
+    build:
+      context: ./rust
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped

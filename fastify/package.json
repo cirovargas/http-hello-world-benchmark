@@ -1,0 +1,7 @@
+{
+  "name": "fastify-bench",
+  "type": "module",
+  "dependencies": {
+    "fastify": "^5"
+  }
+}
