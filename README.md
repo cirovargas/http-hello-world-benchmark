@@ -21,6 +21,7 @@ A simple benchmark comparing HTTP server performance across five languages and f
 | fastify | JavaScript | Fastify | Node 23 / Fastify 5 | 3000 |
 | golang | Go | net/http (stdlib) | Go 1.24 | 4000 |
 | rust | Rust | Actix-web | Rust latest / Actix-web 4 | 5000 |
+| rust-tokio | Rust | Axum (Tokio + Hyper) | Rust latest / Axum 0.8 / Tokio 1 | 5001 |
 | java | Java | Spring Boot WebFlux (Netty) | Java 21 / Spring Boot 3.4 | 8080 |
 | java-native | Java | Spring Boot WebFlux + GraalVM Native | Java 21 / Spring Boot 3.4 / GraalVM CE 21 | 8081 |
 
@@ -51,7 +52,8 @@ Swoole is compiled with **io_uring enabled** (`--enable-swoole-uring`, liburing 
 | 4 | Go | net/http | **15,680** | 127 ms | 124 ms | 138 ms | 151 ms | 0 |
 | 5 | Python | FastAPI + Granian | **14,613** | 137 ms | 119 ms | 169 ms | 191 ms | 0 |
 | 6 | Java | Spring Boot WebFlux + GraalVM Native | **14,452** | 138 ms | 113 ms | 185 ms | 199 ms | 0 |
-| 7 | Java | Spring Boot WebFlux (JVM) | **13,116** | 152 ms | 134 ms | 200 ms | 794 ms | 0 |
+| 7 | Rust | Axum (Tokio) | **14,087** | 142 ms | 116 ms | 142 ms | 1,129 ms | 0 |
+| 8 | Java | Spring Boot WebFlux (JVM) | **13,116** | 152 ms | 134 ms | 200 ms | 794 ms | 0 |
 
 ---
 
@@ -213,6 +215,37 @@ Percentage of the requests served within a certain time (ms)
 </details>
 
 <details>
+<summary>Rust — Axum / Tokio (port 5001)</summary>
+
+```
+Concurrency Level:      2000
+Time taken for tests:   70.988 seconds
+Complete requests:      1000000
+Failed requests:        0
+Requests per second:    14086.81 [#/sec] (mean)
+Time per request:       141.977 [ms] (mean)
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0    0   1.3      0     913
+Processing:    11  142 145.1    116    1173
+Waiting:        0  142 145.1    116    1173
+Total:         28  142 145.3    116    1173
+
+Percentage of the requests served within a certain time (ms)
+  50%    116
+  66%    119
+  75%    121
+  80%    123
+  90%    129
+  95%    142
+  98%   1018
+  99%   1129
+ 100%   1173 (longest request)
+```
+</details>
+
+<details>
 <summary>Java — Spring Boot WebFlux / Netty (port 8080)</summary>
 
 ```
@@ -281,6 +314,7 @@ Percentage of the requests served within a certain time (ms)
 - **Swoole** and **Rust** are essentially tied at the top (~232 req/s apart). Swoole benefits from io_uring for async I/O at the kernel level and is a compiled C extension driving the event loop, not interpreted PHP.
 - **Fastify and Go** are also nearly identical (~5 req/s apart), both sitting just below the top two.
 - **FastAPI + Granian** with a single worker delivers ~14,600 req/s — a ~2.7× improvement over Uvicorn (5,409 req/s). Granian is a Rust-based ASGI server that avoids much of Uvicorn's Python overhead. Python is now within 15% of Go/Fastify.
+- **Axum (Tokio)** reaches ~14,100 req/s with good median (116 ms) and p95 (142 ms), but p99 spikes to 1,129 ms under sustained 2,000-connection load with a single worker thread. Actix-web handles the same conditions with a p99 of just 147 ms, suggesting Actix-web's internal dispatcher handles connection backpressure more gracefully.
 - **Spring Boot WebFlux + GraalVM Native** (AOT-compiled) reaches ~14,450 req/s — a ~10% improvement over the JVM version, but more importantly the p99 tail drops from 794 ms to 199 ms, eliminating GC pause spikes entirely. Compile time is ~46s.
 - **Spring Boot WebFlux (JVM)** lands at ~13,100 req/s. GC pauses are visible in the p99 tail (794 ms). The default Netty event loop uses multiple threads despite the 1 CPU limit.
 
@@ -293,7 +327,8 @@ ab -n 1000000 -c 2000 http://localhost:9501/   # Swoole
 ab -n 1000000 -c 2000 http://localhost:8000/   # FastAPI
 ab -n 1000000 -c 2000 http://localhost:3000/   # Fastify
 ab -n 1000000 -c 2000 http://localhost:4000/   # Go
-ab -n 1000000 -c 2000 http://localhost:5000/   # Rust
+ab -n 1000000 -c 2000 http://localhost:5000/   # Rust (Actix-web)
+ab -n 1000000 -c 2000 http://localhost:5001/   # Rust (Axum/Tokio)
 ab -n 1000000 -c 2000 http://localhost:8080/   # Java (JVM)
 ab -n 1000000 -c 2000 http://localhost:8081/   # Java (Native)
 ```

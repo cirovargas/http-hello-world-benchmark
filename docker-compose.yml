@@ -96,6 +96,25 @@ services:
           memory: 1g
     restart: unless-stopped
 
+  rust-tokio:
+    build:
+      context: ./rust-tokio
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5001"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    cap_add:
+      - SYS_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1g
+    restart: unless-stopped
+
   java:
     build:
       context: ./java
